@@ -14,6 +14,12 @@ APP_MACOS="$APP_CONTENTS/MacOS"
 APP_RESOURCES="$APP_CONTENTS/Resources"
 APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
+DEVELOPMENT_IDENTITY="$(
+  /usr/bin/security find-identity -v -p codesigning 2>/dev/null \
+    | /usr/bin/sed -n 's/.*"\(Apple Development:[^"]*\)".*/\1/p' \
+    | /usr/bin/head -1
+)"
+SIGNING_IDENTITY="${TAPE_CODESIGN_IDENTITY:-${DEVELOPMENT_IDENTITY:--}}"
 
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 pkill -x "AppTape" >/dev/null 2>&1 || true
@@ -57,7 +63,7 @@ cat >"$INFO_PLIST" <<PLIST
 </plist>
 PLIST
 
-/usr/bin/codesign --force --deep --sign - "$APP_BUNDLE"
+/usr/bin/codesign --force --deep --sign "$SIGNING_IDENTITY" "$APP_BUNDLE"
 
 open_app() {
   /usr/bin/open -n "$APP_BUNDLE"
