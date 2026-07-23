@@ -81,11 +81,17 @@ public struct EvidenceFrame: Codable, Equatable, Sendable {
 
 public struct SourceMedia: Codable, Equatable, Sendable {
     public let originalFilename: String
-    public let relativePath: String
+    public let relativePath: String?
+    public let isBundled: Bool
 
-    public init(originalFilename: String, relativePath: String) {
+    public init(
+        originalFilename: String,
+        relativePath: String?,
+        isBundled: Bool = true
+    ) {
         self.originalFilename = originalFilename
         self.relativePath = relativePath
+        self.isBundled = isBundled
     }
 }
 
@@ -101,7 +107,7 @@ public struct BugTapeManifest: Codable, Equatable, Sendable {
     public let frames: [EvidenceFrame]
 
     public init(
-        schemaVersion: Int = 1,
+        schemaVersion: Int = 2,
         id: UUID = UUID(),
         title: String,
         createdAt: Date = Date(),

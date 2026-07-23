@@ -1,8 +1,8 @@
-# BugTape agent guide
+# AppTape agent guide
 
-BugTape is a local-first, open-source QA handoff tool for iOS developers. It
-turns a narrated Simulator recording into a portable bundle that coding agents
-can read without a hosted service.
+AppTape is a local-first, open-source app-recording handoff tool for developers.
+It turns narrated QA, competitor, inspiration, and product recordings into
+inspectable bundles that coding agents can read without a hosted service.
 
 ## Product boundary
 
@@ -18,7 +18,7 @@ can read without a hosted service.
 ```bash
 swift build
 swift test
-swift run bugtape help
+swift run apptape help
 ```
 
 ## Code style

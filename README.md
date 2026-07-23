@@ -1,10 +1,11 @@
-# BugTape
+# AppTape
 
-**Narrate an iOS bug. Hand your agent the tape.**
+**Record an app. Hand your agent the tape.**
 
-BugTape is an early, local-first open-source tool for turning an iOS Simulator
-screen recording into an evidence bundle that Codex, Claude Code, Cursor, or a
-human teammate can inspect. The bundle contains the original recording,
+AppTape is an early, local-first open-source tool for turning QA, competitor,
+inspiration, or product walkthrough recordings into evidence bundles that
+Codex, Claude Code, Cursor, or a human teammate can inspect. A bundle contains
+the original recording or a reference to it,
 timestamped notes or transcript cues, representative frames, Simulator
 metadata, a stable JSON manifest, and a readable Markdown report.
 
@@ -23,7 +24,7 @@ The adjacent products are good at different jobs:
 - [Screen Flow Pro](https://screenflowpro.app/) provides polished Mac/iOS
   recording, timecoded transcripts, voice markers, and support bundles.
 
-BugTape's intended wedge is narrower and open: a local, inspectable file format
+AppTape's intended wedge is narrower and open: a local, inspectable file format
 and CLI that compiles narrated Simulator QA into agent context. It should
 eventually interoperate with—not vaguely clone—recorders and replay tools.
 
@@ -37,7 +38,7 @@ eventually interoperate with—not vaguely clone—recorders and replay tools.
 - Extract JPEG evidence frames at note/transcript timestamps
 - Capture the currently booted Simulator's device/runtime metadata when present
 - Emit `report.md` plus a versioned `manifest.json`
-- Keep the source video inside a portable directory
+- Bundle the source video for portability, or omit its copy for compact research
 
 Local speech-to-text is deliberately not faked in v0.1. Use macOS/iOS
 transcription, Screen Flow Pro, Whisper, or another local tool to create an SRT
@@ -55,21 +56,21 @@ swift test
 # Recommended: record any Mac display or selection with microphone narration
 # and visible click indicators. This works with Simulator, QuickTime's iPhone
 # preview, or iPhone Mirroring.
-swift run bugtape capture qa-run.mov
+swift run apptape capture qa-run.mov
 
 # Record the booted Simulator. Press Control-C to stop.
 # This lower-level mode records only the device pixels and has no microphone.
-swift run bugtape record qa-run.mp4
+swift run apptape record qa-run.mp4
 
 # Compile a recording into an agent-readable bundle.
-swift run bugtape bundle qa-run.mp4 \
-  --output BugTapeBundles/login-regression \
+swift run apptape bundle qa-run.mp4 \
+  --output AppTapeBundles/login-regression \
   --title "Login regression" \
   --transcript qa-run.srt \
   --notes qa-notes.txt
 
 # Inspect metadata without creating a bundle.
-swift run bugtape inspect qa-run.mp4
+swift run apptape inspect qa-run.mp4
 ```
 
 Timestamped notes use one line per observation:
@@ -85,7 +86,7 @@ and `idea` make useful conventions.
 
 ### Recommended narrated QA workflow
 
-1. Run `swift run bugtape capture qa-run.mov`.
+1. Run `swift run apptape capture qa-run.mov`.
 2. In Apple's recording toolbar, choose the whole display or draw a selection
    around Simulator/iPhone Mirroring. Under **Options**, confirm the microphone
    you want to use.
@@ -95,15 +96,15 @@ and `idea` make useful conventions.
 5. Compile the recording with a transcript or notes sidecar:
 
    ```bash
-   swift run bugtape bundle qa-run.mov \
-     --output BugTapeBundles/paco-qa \
+   swift run apptape bundle qa-run.mov \
+     --output AppTapeBundles/paco-qa \
      --title "Paco QA" \
      --transcript qa-run.srt \
      --frame-interval 10
    ```
 
 The `capture` command uses Apple's local screen recorder. The original `.mov`
-contains the selected microphone audio and visible click indicators. BugTape
+contains the selected microphone audio and visible click indicators. AppTape
 does not upload it. Automatic local speech-to-text remains a separate roadmap
 item; until then, pass an SRT/VTT file or give the recording directly to an
 agent that can transcribe it.
@@ -130,7 +131,20 @@ Give an agent the bundle directory, or start with:
 The JSON schema is documented in
 [`docs/BUNDLE_FORMAT.md`](docs/BUNDLE_FORMAT.md).
 
-## What BugTape does not yet do
+For a large competitor or inspiration recording, keep the original outside the
+repo and create a compact evidence bundle:
+
+```bash
+swift run apptape bundle walkthrough.mp4 \
+  --output AppTapeBundles/competitor-walkthrough \
+  --notes walkthrough-notes.txt \
+  --omit-source
+```
+
+The compatibility command `swift run bugtape ...` remains available while
+existing scripts migrate to the AppTape name.
+
+## What AppTape does not yet do
 
 - Detect raw pointer/tap events. A cursor visible in the recording remains
   visible in the original video and extracted frames.
@@ -148,6 +162,5 @@ See [`docs/PRODUCT.md`](docs/PRODUCT.md),
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and
 [`docs/ROADMAP.md`](docs/ROADMAP.md). The project is MIT licensed.
 
-The name **BugTape** is provisional. A web search found unrelated historical
-uses, including an insect-control trademark, so naming and trademark clearance
-must happen before a public brand launch.
+**AppTape** is the working product direction. Trademark and domain clearance
+still need to happen before a public brand launch.

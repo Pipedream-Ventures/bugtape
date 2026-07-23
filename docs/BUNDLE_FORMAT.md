@@ -1,4 +1,4 @@
-# BugTape bundle format v1
+# AppTape bundle format v2
 
 `manifest.json` is the durable interface. Consumers must ignore unknown fields.
 
@@ -6,11 +6,11 @@
 
 | Field | Meaning |
 |---|---|
-| `schemaVersion` | Integer bundle contract version; currently `1` |
+| `schemaVersion` | Integer bundle contract version; currently `2` |
 | `id` | Stable UUID for this compilation |
 | `title` | Human-readable session title |
 | `createdAt` | ISO 8601 compilation time |
-| `source` | Original filename and relative path in the bundle |
+| `source` | Original filename, optional relative path, and whether source is bundled |
 | `video` | Duration, dimensions, audio presence, and byte size |
 | `environment` | Host and best-effort booted Simulator context |
 | `observations` | Timestamped human notes and transcript cues |
@@ -32,3 +32,7 @@ future mapping.
 Adding optional fields does not change the schema version. Renaming fields,
 changing meanings, or removing values requires a new version and migration
 notes.
+
+Version 2 makes `source.relativePath` optional and adds `source.isBundled`.
+This supports compact research bundles that preserve timeline evidence without
+duplicating a large source recording.

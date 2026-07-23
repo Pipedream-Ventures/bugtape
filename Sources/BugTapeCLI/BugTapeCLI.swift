@@ -69,7 +69,8 @@ struct BugTapeCLI {
             title: options.value(for: "--title") ?? defaultTitle,
             transcriptURL: options.url(for: "--transcript"),
             notesURL: options.url(for: "--notes"),
-            frameIntervalSeconds: interval
+            frameIntervalSeconds: interval,
+            includeSourceVideo: !options.contains("--omit-source")
         )
         let manifest = try await BundleCompiler.compile(request)
         print("Created \(request.outputURL.path)")
@@ -172,13 +173,13 @@ struct BugTapeCLI {
     private static func printHelp() {
         print(
             """
-            BugTape — narrated iOS QA into agent-readable evidence
+            AppTape — recorded app behavior into agent-readable evidence
 
             USAGE
-              bugtape capture <output.mov> [--no-audio]
-              bugtape record <output.mp4>
-              bugtape inspect <video>
-              bugtape bundle <video> --output <directory> [options]
+              apptape capture <output.mov> [--no-audio]
+              apptape record <output.mp4>
+              apptape inspect <video>
+              apptape bundle <video> --output <directory> [options]
 
             CAPTURE
               Opens Apple's screen-recording toolbar for a display or selection.
@@ -190,6 +191,7 @@ struct BugTapeCLI {
               --transcript <file>        SRT, VTT, or plain text transcript
               --notes <file>             Timestamped QA notes
               --frame-interval <seconds> Also extract frames on an interval
+              --omit-source              Reference the original without copying it
 
             NOTES FORMAT
               00:08 blocker Sign in does nothing
@@ -212,7 +214,7 @@ private enum CLIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unknownCommand(let command):
-            return "Unknown command '\(command)'. Run 'bugtape help'."
+            return "Unknown command '\(command)'. Run 'apptape help'."
         case .missingArgument(let name):
             return "Missing required \(name) argument."
         case .missingOption(let option):
@@ -220,7 +222,7 @@ private enum CLIError: LocalizedError {
         case .missingOptionValue(let option):
             return "Missing value for \(option)."
         case .unknownOption(let option):
-            return "Unknown option '\(option)'. Run 'bugtape help'."
+            return "Unknown option '\(option)'. Run 'apptape help'."
         case .outputExists(let url):
             return "Output already exists: \(url.path)"
         case .processFailed(let status):
@@ -233,14 +235,21 @@ private enum CLIError: LocalizedError {
 
 private struct Options {
     let values: [String: String]
+    let flags: Set<String>
 
     static func parse(_ arguments: [String]) throws -> Options {
         var values: [String: String] = [:]
+        var flags: Set<String> = []
         var index = 0
         while index < arguments.count {
             let option = arguments[index]
             guard option.hasPrefix("--") else {
                 throw CLIError.unknownCommand(option)
+            }
+            if option == "--omit-source" {
+                flags.insert(option)
+                index += 1
+                continue
             }
             let valueIndex = index + 1
             guard valueIndex < arguments.count else {
@@ -249,7 +258,7 @@ private struct Options {
             values[option] = arguments[valueIndex]
             index += 2
         }
-        return Options(values: values)
+        return Options(values: values, flags: flags)
     }
 
     func value(for key: String) -> String? {
@@ -261,5 +270,9 @@ private struct Options {
             return nil
         }
         return URL(fileURLWithPath: value).standardizedFileURL
+    }
+
+    func contains(_ key: String) -> Bool {
+        flags.contains(key)
     }
 }

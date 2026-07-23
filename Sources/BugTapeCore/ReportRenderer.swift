@@ -5,12 +5,12 @@ public enum ReportRenderer {
         var lines: [String] = [
             "# \(manifest.title)",
             "",
-            "> BugTape evidence bundle. Human notes and captured media are evidence;",
+            "> AppTape evidence bundle. Human notes and captured media are evidence;",
             "> expected behavior and causes still require verification.",
             "",
             "## Recording",
             "",
-            "- Source: [`\(manifest.source.originalFilename)`](\(manifest.source.relativePath))",
+            sourceLine(for: manifest.source),
             "- Duration: \(Timestamp.format(manifest.video.durationSeconds))",
             "- Dimensions: \(manifest.video.width) × \(manifest.video.height)",
             "- Audio: \(manifest.video.hasAudio ? "yes" : "no")",
@@ -78,5 +78,12 @@ public enum ReportRenderer {
         ])
 
         return lines.joined(separator: "\n")
+    }
+
+    private static func sourceLine(for source: SourceMedia) -> String {
+        guard let relativePath = source.relativePath, source.isBundled else {
+            return "- Source: `\(source.originalFilename)` (referenced, not bundled)"
+        }
+        return "- Source: [`\(source.originalFilename)`](\(relativePath))"
     }
 }

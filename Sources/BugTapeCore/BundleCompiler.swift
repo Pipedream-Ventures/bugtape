@@ -7,6 +7,7 @@ public struct BundleRequest: Sendable {
     public let transcriptURL: URL?
     public let notesURL: URL?
     public let frameIntervalSeconds: Double?
+    public let includeSourceVideo: Bool
 
     public init(
         videoURL: URL,
@@ -14,7 +15,8 @@ public struct BundleRequest: Sendable {
         title: String,
         transcriptURL: URL?,
         notesURL: URL?,
-        frameIntervalSeconds: Double?
+        frameIntervalSeconds: Double?,
+        includeSourceVideo: Bool = true
     ) {
         self.videoURL = videoURL
         self.outputURL = outputURL
@@ -22,6 +24,7 @@ public struct BundleRequest: Sendable {
         self.transcriptURL = transcriptURL
         self.notesURL = notesURL
         self.frameIntervalSeconds = frameIntervalSeconds
+        self.includeSourceVideo = includeSourceVideo
     }
 }
 
@@ -74,15 +77,17 @@ public enum BundleCompiler {
         )
 
         do {
-            let sourceDirectory = request.outputURL.appendingPathComponent("source")
-            try fileManager.createDirectory(
-                at: sourceDirectory,
-                withIntermediateDirectories: true
-            )
-            let copiedVideoURL = sourceDirectory.appendingPathComponent(
-                request.videoURL.lastPathComponent
-            )
-            try fileManager.copyItem(at: request.videoURL, to: copiedVideoURL)
+            if request.includeSourceVideo {
+                let sourceDirectory = request.outputURL.appendingPathComponent("source")
+                try fileManager.createDirectory(
+                    at: sourceDirectory,
+                    withIntermediateDirectories: true
+                )
+                let copiedVideoURL = sourceDirectory.appendingPathComponent(
+                    request.videoURL.lastPathComponent
+                )
+                try fileManager.copyItem(at: request.videoURL, to: copiedVideoURL)
+            }
 
             var timestamps = observations.compactMap(\.startSeconds)
             if let interval = request.frameIntervalSeconds, interval > 0 {
@@ -107,7 +112,10 @@ public enum BundleCompiler {
                 title: request.title,
                 source: SourceMedia(
                     originalFilename: request.videoURL.lastPathComponent,
-                    relativePath: "source/\(request.videoURL.lastPathComponent)"
+                    relativePath: request.includeSourceVideo
+                        ? "source/\(request.videoURL.lastPathComponent)"
+                        : nil,
+                    isBundled: request.includeSourceVideo
                 ),
                 video: metadata,
                 environment: EnvironmentProbe.current(),

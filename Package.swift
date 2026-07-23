@@ -9,6 +9,7 @@ let package = Package(
     ],
     products: [
         .library(name: "BugTapeCore", targets: ["BugTapeCore"]),
+        .executable(name: "apptape", targets: ["BugTapeCLI"]),
         .executable(name: "bugtape", targets: ["BugTapeCLI"])
     ],
     targets: [

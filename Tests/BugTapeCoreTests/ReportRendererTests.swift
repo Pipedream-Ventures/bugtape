@@ -45,3 +45,34 @@ import Testing
     #expect(report.contains("![Evidence at 00:08.000]"))
     #expect(report.contains("Fix only confirmed issues"))
 }
+
+@Test func reportExplainsWhenSourceIsReferencedButNotBundled() {
+    let manifest = BugTapeManifest(
+        title: "Competitor walkthrough",
+        source: SourceMedia(
+            originalFilename: "walkthrough.mp4",
+            relativePath: nil,
+            isBundled: false
+        ),
+        video: VideoMetadata(
+            durationSeconds: 20,
+            width: 1_290,
+            height: 2_796,
+            hasAudio: true,
+            fileSizeBytes: 1_024
+        ),
+        environment: EnvironmentMetadata(
+            hostName: "Mac",
+            macOSVersion: "macOS",
+            simulatorName: nil,
+            simulatorUDID: nil,
+            simulatorRuntime: nil
+        ),
+        observations: [],
+        frames: []
+    )
+
+    let report = ReportRenderer.markdown(for: manifest)
+    #expect(report.contains("walkthrough.mp4` (referenced, not bundled)"))
+    #expect(!report.contains("source/walkthrough.mp4"))
+}
