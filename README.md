@@ -52,7 +52,13 @@ Requires macOS 14+ and Xcode command-line tools.
 swift build
 swift test
 
+# Recommended: record any Mac display or selection with microphone narration
+# and visible click indicators. This works with Simulator, QuickTime's iPhone
+# preview, or iPhone Mirroring.
+swift run bugtape capture qa-run.mov
+
 # Record the booted Simulator. Press Control-C to stop.
+# This lower-level mode records only the device pixels and has no microphone.
 swift run bugtape record qa-run.mp4
 
 # Compile a recording into an agent-readable bundle.
@@ -76,6 +82,31 @@ Timestamped notes use one line per observation:
 
 Supported labels are free-form. `blocker`, `bug`, `ux`, `polish`, `expected`,
 and `idea` make useful conventions.
+
+### Recommended narrated QA workflow
+
+1. Run `swift run bugtape capture qa-run.mov`.
+2. In Apple's recording toolbar, choose the whole display or draw a selection
+   around Simulator/iPhone Mirroring. Under **Options**, confirm the microphone
+   you want to use.
+3. Record the QA session. Narrate what you expected and what happened; labels
+   such as "blocker", "UX", "polish", "expected", and "idea" are useful.
+4. Stop from the macOS menu bar.
+5. Compile the recording with a transcript or notes sidecar:
+
+   ```bash
+   swift run bugtape bundle qa-run.mov \
+     --output BugTapeBundles/paco-qa \
+     --title "Paco QA" \
+     --transcript qa-run.srt \
+     --frame-interval 10
+   ```
+
+The `capture` command uses Apple's local screen recorder. The original `.mov`
+contains the selected microphone audio and visible click indicators. BugTape
+does not upload it. Automatic local speech-to-text remains a separate roadmap
+item; until then, pass an SRT/VTT file or give the recording directly to an
+agent that can transcribe it.
 
 ## Bundle format
 

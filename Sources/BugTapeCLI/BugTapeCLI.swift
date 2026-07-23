@@ -27,6 +27,8 @@ struct BugTapeCLI {
             try await inspect(arguments: Array(arguments.dropFirst()))
         case "bundle":
             try await bundle(arguments: Array(arguments.dropFirst()))
+        case "capture":
+            try capture(arguments: Array(arguments.dropFirst()))
         case "record":
             try record(arguments: Array(arguments.dropFirst()))
         default:
@@ -120,15 +122,68 @@ struct BugTapeCLI {
         print("Saved \(outputURL.path)")
     }
 
+    private static func capture(arguments: [String]) throws {
+        guard let outputPath = arguments.first, !outputPath.hasPrefix("--") else {
+            throw CLIError.missingArgument("output video")
+        }
+
+        let supportedArguments = Set(["--no-audio"])
+        for argument in arguments.dropFirst() {
+            guard supportedArguments.contains(argument) else {
+                throw CLIError.unknownOption(argument)
+            }
+        }
+
+        let outputURL = URL(fileURLWithPath: outputPath).standardizedFileURL
+        guard !FileManager.default.fileExists(atPath: outputURL.path) else {
+            throw CLIError.outputExists(outputURL)
+        }
+
+        let includesAudio = !arguments.dropFirst().contains("--no-audio")
+        let command = MacScreenCaptureCommand(
+            outputURL: outputURL,
+            includesAudio: includesAudio
+        )
+        let process = Process()
+        process.executableURL = command.executableURL
+        process.arguments = command.arguments
+        process.standardOutput = FileHandle.standardOutput
+        process.standardError = FileHandle.standardError
+
+        print("Opening the macOS recording toolbar.")
+        print("Choose a display or selection, then record your QA session.")
+        if includesAudio {
+            print("BugTape will use the microphone selected in macOS Screen Recording options.")
+        }
+        print("Stop from the menu bar when you are finished.")
+
+        try process.run()
+        process.waitUntilExit()
+
+        guard process.terminationStatus == 0 else {
+            throw CLIError.processFailed(process.terminationStatus)
+        }
+        guard FileManager.default.fileExists(atPath: outputURL.path) else {
+            throw CLIError.captureCancelled
+        }
+        print("Saved \(outputURL.path)")
+    }
+
     private static func printHelp() {
         print(
             """
             BugTape — narrated iOS QA into agent-readable evidence
 
             USAGE
+              bugtape capture <output.mov> [--no-audio]
               bugtape record <output.mp4>
               bugtape inspect <video>
               bugtape bundle <video> --output <directory> [options]
+
+            CAPTURE
+              Opens Apple's screen-recording toolbar for a display or selection.
+              Captures the selected microphone and highlights mouse clicks.
+              Use this for Simulator, a mirrored iPhone, or whole-Mac QA.
 
             BUNDLE OPTIONS
               --title <text>             Session title
@@ -149,8 +204,10 @@ private enum CLIError: LocalizedError {
     case missingArgument(String)
     case missingOption(String)
     case missingOptionValue(String)
+    case unknownOption(String)
     case outputExists(URL)
     case processFailed(Int32)
+    case captureCancelled
 
     var errorDescription: String? {
         switch self {
@@ -162,10 +219,14 @@ private enum CLIError: LocalizedError {
             return "Missing required option \(option)."
         case .missingOptionValue(let option):
             return "Missing value for \(option)."
+        case .unknownOption(let option):
+            return "Unknown option '\(option)'. Run 'bugtape help'."
         case .outputExists(let url):
             return "Output already exists: \(url.path)"
         case .processFailed(let status):
-            return "simctl exited with status \(status)."
+            return "Capture process exited with status \(status)."
+        case .captureCancelled:
+            return "Screen recording was cancelled before an output file was created."
         }
     }
 }
