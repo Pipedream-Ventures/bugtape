@@ -12,6 +12,7 @@ import Testing
     )
     let manifest = BugTapeManifest(
         title: "Login QA",
+        summary: "I tested sign in and the dashboard never appeared.",
         source: SourceMedia(
             originalFilename: "login.mp4",
             relativePath: "source/login.mp4"
@@ -42,6 +43,8 @@ import Testing
     let report = ReportRenderer.markdown(for: manifest)
     #expect(report.contains("**[EXPECTED]**"))
     #expect(report.contains("Human notes and captured media are evidence"))
+    #expect(report.contains("## In their words"))
+    #expect(report.contains("dashboard never appeared"))
     #expect(report.contains("![Evidence at 00:08.000]"))
     #expect(report.contains("Fix only confirmed issues"))
 }

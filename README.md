@@ -1,8 +1,8 @@
-# AppTape
+# TAPE
 
 **Record an app. Hand your agent the tape.**
 
-AppTape is an early, local-first open-source tool for turning QA, competitor,
+TAPE is a local-first Mac app for turning QA, competitor,
 inspiration, or product walkthrough recordings into evidence bundles that
 Codex, Claude Code, Cursor, or a human teammate can inspect. A bundle contains
 the original recording or a reference to it,
@@ -11,6 +11,12 @@ metadata, a stable JSON manifest, and a readable Markdown report.
 
 It does not upload your recording, require an SDK, invent reproduction steps,
 or pretend a video is a deterministic test.
+
+## How it works
+
+1. **Record** a screen or window with optional microphone narration.
+2. **Explain** what happened in a short TL;DR; timestamp notes are optional.
+3. **Hand off** a local bundle with the source, frames, metadata, and report.
 
 ## Why this exists
 
@@ -24,12 +30,16 @@ The adjacent products are good at different jobs:
 - [Screen Flow Pro](https://screenflowpro.app/) provides polished Mac/iOS
   recording, timecoded transcripts, voice markers, and support bundles.
 
-AppTape's intended wedge is narrower and open: a local, inspectable file format
+TAPE's intended wedge is narrower and open: a local, inspectable file format
 and CLI that compiles narrated Simulator QA into agent context. It should
 eventually interoperate with—not vaguely clone—recorders and replay tools.
 
 ## Current MVP
 
+- Native TAPE Mac app with a visual capture, review, and archive workflow
+- One primary `TAPE` action with screen/microphone permission status
+- A live recording HUD with elapsed time and an in-app stop action
+- Required post-recording TL;DR in the tester's own words
 - Record the booted Simulator using Apple's `simctl`
 - Import `.mp4`, `.mov`, or `.m4v` recordings
 - Read real duration, dimensions, audio presence, and file size
@@ -49,6 +59,33 @@ adapter is on the roadmap.
 
 Requires macOS 14+ and Xcode command-line tools.
 
+### Open the Mac app
+
+```bash
+./script/build_and_run.sh
+```
+
+The script builds and stages a real `dist/TAPE.app`, opens it, and verifies
+that the GUI process launched. The same command is configured as the Codex Run
+action.
+
+For Paco on a real iPhone:
+
+1. Connect the phone by USB, then open **QuickTime Player → New Movie
+   Recording** and choose the iPhone as the camera, or use iPhone Mirroring.
+2. Open TAPE.
+3. Press **TAPE**, choose the QuickTime/iPhone Mirroring window in Apple's
+   capture controls, and narrate while you test.
+4. Stop from TAPE or the macOS menu bar.
+5. Write the short **What happened?** TL;DR, add any timestamped notes, and
+   build the tape.
+
+TAPE shows whether screen and microphone access are ready, will prompt, are
+blocked, or are off. After capture, it inspects the actual file and reports
+whether an audio track is present.
+
+### Use the CLI
+
 ```bash
 swift build
 swift test
@@ -64,7 +101,7 @@ swift run apptape record qa-run.mp4
 
 # Compile a recording into an agent-readable bundle.
 swift run apptape bundle qa-run.mp4 \
-  --output AppTapeBundles/login-regression \
+  --output TapeBundles/login-regression \
   --title "Login regression" \
   --transcript qa-run.srt \
   --notes qa-notes.txt
@@ -97,14 +134,14 @@ and `idea` make useful conventions.
 
    ```bash
    swift run apptape bundle qa-run.mov \
-     --output AppTapeBundles/paco-qa \
+     --output TapeBundles/paco-qa \
      --title "Paco QA" \
      --transcript qa-run.srt \
      --frame-interval 10
    ```
 
 The `capture` command uses Apple's local screen recorder. The original `.mov`
-contains the selected microphone audio and visible click indicators. AppTape
+contains the selected microphone audio and visible click indicators. TAPE
 does not upload it. Automatic local speech-to-text remains a separate roadmap
 item; until then, pass an SRT/VTT file or give the recording directly to an
 agent that can transcribe it.
@@ -136,15 +173,15 @@ repo and create a compact evidence bundle:
 
 ```bash
 swift run apptape bundle walkthrough.mp4 \
-  --output AppTapeBundles/competitor-walkthrough \
+  --output TapeBundles/competitor-walkthrough \
   --notes walkthrough-notes.txt \
   --omit-source
 ```
 
-The compatibility command `swift run bugtape ...` remains available while
-existing scripts migrate to the AppTape name.
+The compatibility commands `swift run apptape ...` and `swift run bugtape ...`
+remain available while existing scripts migrate to TAPE.
 
-## What AppTape does not yet do
+## What TAPE does not yet do
 
 - Detect raw pointer/tap events. A cursor visible in the recording remains
   visible in the original video and extracted frames.
@@ -162,5 +199,5 @@ See [`docs/PRODUCT.md`](docs/PRODUCT.md),
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and
 [`docs/ROADMAP.md`](docs/ROADMAP.md). The project is MIT licensed.
 
-**AppTape** is the working product direction. Trademark and domain clearance
+**TAPE** is the working product direction. Trademark and domain clearance
 still need to happen before a public brand launch.

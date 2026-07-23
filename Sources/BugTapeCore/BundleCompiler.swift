@@ -4,6 +4,7 @@ public struct BundleRequest: Sendable {
     public let videoURL: URL
     public let outputURL: URL
     public let title: String
+    public let summary: String?
     public let transcriptURL: URL?
     public let notesURL: URL?
     public let frameIntervalSeconds: Double?
@@ -13,6 +14,7 @@ public struct BundleRequest: Sendable {
         videoURL: URL,
         outputURL: URL,
         title: String,
+        summary: String? = nil,
         transcriptURL: URL?,
         notesURL: URL?,
         frameIntervalSeconds: Double?,
@@ -21,6 +23,7 @@ public struct BundleRequest: Sendable {
         self.videoURL = videoURL
         self.outputURL = outputURL
         self.title = title
+        self.summary = summary
         self.transcriptURL = transcriptURL
         self.notesURL = notesURL
         self.frameIntervalSeconds = frameIntervalSeconds
@@ -110,6 +113,7 @@ public enum BundleCompiler {
 
             let manifest = BugTapeManifest(
                 title: request.title,
+                summary: request.summary,
                 source: SourceMedia(
                     originalFilename: request.videoURL.lastPathComponent,
                     relativePath: request.includeSourceVideo

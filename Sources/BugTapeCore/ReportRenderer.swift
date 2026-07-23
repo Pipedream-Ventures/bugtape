@@ -5,9 +5,16 @@ public enum ReportRenderer {
         var lines: [String] = [
             "# \(manifest.title)",
             "",
-            "> AppTape evidence bundle. Human notes and captured media are evidence;",
+            "> TAPE evidence bundle. Human notes and captured media are evidence;",
             "> expected behavior and causes still require verification.",
-            "",
+            ""
+        ]
+
+        if let summary = manifest.summary, !summary.isEmpty {
+            lines.append(contentsOf: ["## In their words", "", summary, ""])
+        }
+
+        lines.append(contentsOf: [
             "## Recording",
             "",
             sourceLine(for: manifest.source),
@@ -20,7 +27,7 @@ public enum ReportRenderer {
             "",
             "- Host: \(manifest.environment.hostName)",
             "- macOS: \(manifest.environment.macOSVersion)"
-        ]
+        ])
 
         if let simulatorName = manifest.environment.simulatorName {
             lines.append("- Simulator: \(simulatorName)")

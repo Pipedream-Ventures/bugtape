@@ -7,3 +7,6 @@ DerivedData/
 *.mov
 *.m4v
 BugTapeBundles/
+AppTapeBundles/
+TapeBundles/
+dist/

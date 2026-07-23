@@ -9,6 +9,8 @@ let package = Package(
     ],
     products: [
         .library(name: "BugTapeCore", targets: ["BugTapeCore"]),
+        .executable(name: "TAPE", targets: ["AppTapeApp"]),
+        .executable(name: "AppTape", targets: ["AppTapeApp"]),
         .executable(name: "apptape", targets: ["BugTapeCLI"]),
         .executable(name: "bugtape", targets: ["BugTapeCLI"])
     ],
@@ -24,6 +26,18 @@ let package = Package(
         .executableTarget(
             name: "BugTapeCLI",
             dependencies: ["BugTapeCore"]
+        ),
+        .executableTarget(
+            name: "AppTapeApp",
+            dependencies: ["BugTapeCore"],
+            path: "Sources/AppTapeApp",
+            resources: [
+                .copy("Resources")
+            ],
+            linkerSettings: [
+                .linkedFramework("AppKit"),
+                .linkedFramework("AVKit")
+            ]
         ),
         .testTarget(
             name: "BugTapeCoreTests",

@@ -99,6 +99,7 @@ public struct BugTapeManifest: Codable, Equatable, Sendable {
     public let schemaVersion: Int
     public let id: UUID
     public let title: String
+    public let summary: String?
     public let createdAt: Date
     public let source: SourceMedia
     public let video: VideoMetadata
@@ -107,9 +108,10 @@ public struct BugTapeManifest: Codable, Equatable, Sendable {
     public let frames: [EvidenceFrame]
 
     public init(
-        schemaVersion: Int = 2,
+        schemaVersion: Int = 3,
         id: UUID = UUID(),
         title: String,
+        summary: String? = nil,
         createdAt: Date = Date(),
         source: SourceMedia,
         video: VideoMetadata,
@@ -120,6 +122,7 @@ public struct BugTapeManifest: Codable, Equatable, Sendable {
         self.schemaVersion = schemaVersion
         self.id = id
         self.title = title
+        self.summary = summary
         self.createdAt = createdAt
         self.source = source
         self.video = video

@@ -10,10 +10,11 @@ grounded context to investigate without rewriting the session as a ticket.
 
 1. Start or import a Simulator recording.
 2. Narrate what is wrong, expected, uncertain, or merely an idea.
-3. Preserve the original evidence and collect machine-readable context.
-4. Review a short, timestamped issue index.
-5. Give the portable bundle to a local coding agent.
-6. Let the agent verify, fix, and eventually replay the flow.
+3. Explain what happened in a short TL;DR in the tester's own words.
+4. Preserve the original evidence and collect machine-readable context.
+5. Review a short, timestamped issue index.
+6. Give the portable bundle to a local coding agent.
+7. Let the agent verify, fix, and eventually replay the flow.
 
 ## Principles
 
@@ -35,7 +36,7 @@ against Simulator builds. Physical-device and cross-platform QA can follow.
 
 clip.qa already offers mobile capture, hosted AI reports, integrations, and
 CLI/MCP access. qckfx offers deterministic Simulator record/replay and visual
-diffs. Screen Flow Pro offers recording, transcript, and markers. BugTape should
+diffs. Screen Flow Pro offers recording, transcript, and markers. TAPE should
 win by being a transparent open interchange layer and composable local tool,
 not by making broader promises with a smaller implementation.
 

@@ -1,4 +1,4 @@
-# AppTape bundle format v2
+# TAPE bundle format v3
 
 `manifest.json` is the durable interface. Consumers must ignore unknown fields.
 
@@ -6,9 +6,10 @@
 
 | Field | Meaning |
 |---|---|
-| `schemaVersion` | Integer bundle contract version; currently `2` |
+| `schemaVersion` | Integer bundle contract version; currently `3` |
 | `id` | Stable UUID for this compilation |
 | `title` | Human-readable session title |
+| `summary` | Optional tester-written TL;DR of what they recorded |
 | `createdAt` | ISO 8601 compilation time |
 | `source` | Original filename, optional relative path, and whether source is bundled |
 | `video` | Duration, dimensions, audio presence, and byte size |
@@ -36,3 +37,7 @@ notes.
 Version 2 makes `source.relativePath` optional and adds `source.isBundled`.
 This supports compact research bundles that preserve timeline evidence without
 duplicating a large source recording.
+
+Version 3 adds the optional top-level `summary` field. The native Mac app
+requires it for new tapes and renders it as **In their words** before machine
+metadata and timeline evidence. Existing v2 bundles remain readable.

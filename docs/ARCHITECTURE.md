@@ -1,14 +1,13 @@
 # Architecture
 
-BugTape starts as a Swift Package with a small executable and a reusable core.
-That keeps the first artifact scriptable, testable, and ready to embed in a
-future native macOS app.
+TAPE is a Swift Package with a native macOS app, a small executable, and a
+reusable core. The GUI and CLI compile the same local evidence format.
 
 ```text
-simctl / imported video
+Apple capture / simctl / imported video
           |
           v
-     BugTape CLI
+   TAPE Mac app or CLI
           |
           +--> AVFoundation metadata + frames
           +--> SRT / VTT / notes parsers
@@ -27,6 +26,8 @@ simctl / imported video
 
 - `BugTapeCore`: domain models, parsers, metadata extraction, frame extraction,
   bundle compilation, and Markdown rendering.
+- `AppTapeApp`: native SwiftUI capture, permission status, TL;DR, review,
+  archive, and agent-handoff workflow.
 - `bugtape`: command parsing, `simctl` process control, and terminal output.
 - `BugTapeCoreTests`: deterministic tests for timestamp parsing, notes,
   subtitles, and report rendering.
@@ -46,6 +47,6 @@ with a provenance link to the local original.
 ## Platform choices
 
 AVFoundation provides native media metadata and frame extraction without
-shipping ffmpeg. `xcrun simctl` is the public Xcode entry point for Simulator
-recording and device context. Swift models make a future SwiftUI review app
-straightforward.
+shipping ffmpeg. Apple's screen recorder handles display/window selection and
+microphone capture; TAPE owns the launch, live state, stop action, and
+post-capture handoff. `xcrun simctl` remains the lower-level Simulator path.
