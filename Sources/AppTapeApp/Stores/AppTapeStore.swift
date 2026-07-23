@@ -26,6 +26,7 @@ final class AppTapeStore: ObservableObject {
 
     let outputRoot: URL
     private let recorder = ScreenRecordingService()
+    private let screenCaptureRequestKey = "didRequestScreenCaptureAccess"
 
     init() {
         outputRoot = FileManager.default.homeDirectoryForCurrentUser
@@ -49,6 +50,14 @@ final class AppTapeStore: ObservableObject {
     func recordScreen() async {
         errorMessage = nil
         successMessage = nil
+
+        guard requestScreenCaptureAccess() else {
+            return
+        }
+        guard await requestMicrophoneAccessIfNeeded() else {
+            return
+        }
+
         isRecording = true
         recordingStartedAt = .now
         defer {
@@ -87,7 +96,13 @@ final class AppTapeStore: ObservableObject {
     }
 
     var screenCaptureStatus: CaptureReadiness {
-        CGPreflightScreenCaptureAccess() ? .ready : .willPrompt
+        if CGPreflightScreenCaptureAccess() {
+            return .ready
+        }
+        if UserDefaults.standard.bool(forKey: screenCaptureRequestKey) {
+            return .blocked
+        }
+        return .willPrompt
     }
 
     var microphoneStatus: CaptureReadiness {
@@ -104,6 +119,51 @@ final class AppTapeStore: ObservableObject {
         @unknown default:
             return .willPrompt
         }
+    }
+
+    private func requestScreenCaptureAccess() -> Bool {
+        if CGPreflightScreenCaptureAccess() {
+            return true
+        }
+
+        UserDefaults.standard.set(true, forKey: screenCaptureRequestKey)
+        if CGRequestScreenCaptureAccess() {
+            return true
+        }
+
+        errorMessage = "Allow TAPE in Privacy & Security → Screen & System Audio Recording, then reopen TAPE."
+        openPrivacySettings(anchor: "Privacy_ScreenCapture")
+        return false
+    }
+
+    private func requestMicrophoneAccessIfNeeded() async -> Bool {
+        guard includesMicrophone else {
+            return true
+        }
+
+        let status = AVCaptureDevice.authorizationStatus(for: .audio)
+        if status == .authorized {
+            return true
+        }
+        if status == .notDetermined {
+            let granted = await AVCaptureDevice.requestAccess(for: .audio)
+            if granted {
+                return true
+            }
+        }
+
+        errorMessage = "Allow TAPE to use the microphone in Privacy & Security → Microphone."
+        openPrivacySettings(anchor: "Privacy_Microphone")
+        return false
+    }
+
+    private func openPrivacySettings(anchor: String) {
+        guard let url = URL(
+            string: "x-apple.systempreferences:com.apple.preference.security?\(anchor)"
+        ) else {
+            return
+        }
+        NSWorkspace.shared.open(url)
     }
 
     func importRecording() async {

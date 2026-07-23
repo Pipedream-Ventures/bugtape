@@ -173,13 +173,13 @@ struct BugTapeCLI {
     private static func printHelp() {
         print(
             """
-            AppTape — recorded app behavior into agent-readable evidence
+            TAPE CLI — recorded app behavior into agent-readable evidence
 
             USAGE
-              apptape capture <output.mov> [--no-audio]
-              apptape record <output.mp4>
-              apptape inspect <video>
-              apptape bundle <video> --output <directory> [options]
+              tape-cli capture <output.mov> [--no-audio]
+              tape-cli record <output.mp4>
+              tape-cli inspect <video>
+              tape-cli bundle <video> --output <directory> [options]
 
             CAPTURE
               Opens Apple's screen-recording toolbar for a display or selection.
@@ -214,7 +214,7 @@ private enum CLIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unknownCommand(let command):
-            return "Unknown command '\(command)'. Run 'apptape help'."
+            return "Unknown command '\(command)'. Run 'tape-cli help'."
         case .missingArgument(let name):
             return "Missing required \(name) argument."
         case .missingOption(let option):
@@ -222,7 +222,7 @@ private enum CLIError: LocalizedError {
         case .missingOptionValue(let option):
             return "Missing value for \(option)."
         case .unknownOption(let option):
-            return "Unknown option '\(option)'. Run 'apptape help'."
+            return "Unknown option '\(option)'. Run 'tape-cli help'."
         case .outputExists(let url):
             return "Output already exists: \(url.path)"
         case .processFailed(let status):

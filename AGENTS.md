@@ -1,6 +1,6 @@
-# AppTape agent guide
+# TAPE agent guide
 
-AppTape is a local-first, open-source app-recording handoff tool for developers.
+TAPE is a local-first, open-source app-recording handoff tool for developers.
 It turns narrated QA, competitor, inspiration, and product recordings into
 inspectable bundles that coding agents can read without a hosted service.
 
@@ -18,7 +18,7 @@ inspectable bundles that coding agents can read without a hosted service.
 ```bash
 swift build
 swift test
-swift run apptape help
+swift run tape-cli help
 ```
 
 ## Code style

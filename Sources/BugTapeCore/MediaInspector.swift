@@ -63,13 +63,10 @@ public enum MediaInspector {
 
         for timestamp in uniqueTimes {
             let requestedTime = CMTime(seconds: timestamp, preferredTimescale: 600)
-            let image: CGImage
-            if #available(macOS 13.0, *) {
-                image = try await generator.image(at: requestedTime).image
-            } else {
-                var actualTime = CMTime.zero
-                image = try generator.copyCGImage(at: requestedTime, actualTime: &actualTime)
-            }
+            let image = try await generateImage(
+                with: generator,
+                at: requestedTime
+            )
 
             let filename = String(format: "frame-%08.3f.jpg", timestamp)
             let destinationURL = outputDirectory.appendingPathComponent(filename)
@@ -83,6 +80,25 @@ public enum MediaInspector {
         }
 
         return frames
+    }
+
+    private static func generateImage(
+        with generator: AVAssetImageGenerator,
+        at time: CMTime
+    ) async throws -> CGImage {
+        try await withCheckedThrowingContinuation { continuation in
+            generator.generateCGImageAsynchronously(for: time) { image, _, error in
+                if let image {
+                    continuation.resume(returning: image)
+                    return
+                }
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                continuation.resume(throwing: MediaError.couldNotCreateImage)
+            }
+        }
     }
 
     private static func writeJPEG(_ image: CGImage, to url: URL) throws {

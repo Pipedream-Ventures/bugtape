@@ -93,21 +93,21 @@ swift test
 # Recommended: record any Mac display or selection with microphone narration
 # and visible click indicators. This works with Simulator, QuickTime's iPhone
 # preview, or iPhone Mirroring.
-swift run apptape capture qa-run.mov
+swift run tape-cli capture qa-run.mov
 
 # Record the booted Simulator. Press Control-C to stop.
 # This lower-level mode records only the device pixels and has no microphone.
-swift run apptape record qa-run.mp4
+swift run tape-cli record qa-run.mp4
 
 # Compile a recording into an agent-readable bundle.
-swift run apptape bundle qa-run.mp4 \
+swift run tape-cli bundle qa-run.mp4 \
   --output TapeBundles/login-regression \
   --title "Login regression" \
   --transcript qa-run.srt \
   --notes qa-notes.txt
 
 # Inspect metadata without creating a bundle.
-swift run apptape inspect qa-run.mp4
+swift run tape-cli inspect qa-run.mp4
 ```
 
 Timestamped notes use one line per observation:
@@ -123,7 +123,7 @@ and `idea` make useful conventions.
 
 ### Recommended narrated QA workflow
 
-1. Run `swift run apptape capture qa-run.mov`.
+1. Run `swift run tape-cli capture qa-run.mov`.
 2. In Apple's recording toolbar, choose the whole display or draw a selection
    around Simulator/iPhone Mirroring. Under **Options**, confirm the microphone
    you want to use.
@@ -133,7 +133,7 @@ and `idea` make useful conventions.
 5. Compile the recording with a transcript or notes sidecar:
 
    ```bash
-   swift run apptape bundle qa-run.mov \
+   swift run tape-cli bundle qa-run.mov \
      --output TapeBundles/paco-qa \
      --title "Paco QA" \
      --transcript qa-run.srt \
@@ -172,14 +172,14 @@ For a large competitor or inspiration recording, keep the original outside the
 repo and create a compact evidence bundle:
 
 ```bash
-swift run apptape bundle walkthrough.mp4 \
+swift run tape-cli bundle walkthrough.mp4 \
   --output TapeBundles/competitor-walkthrough \
   --notes walkthrough-notes.txt \
   --omit-source
 ```
 
-The compatibility commands `swift run apptape ...` and `swift run bugtape ...`
-remain available while existing scripts migrate to TAPE.
+The CLI deliberately uses the distinct `tape-cli` executable name so it cannot
+collide with the `TAPE` Mac app on case-insensitive macOS filesystems.
 
 ## What TAPE does not yet do
 

@@ -3,14 +3,17 @@ import Foundation
 
 enum ScreenRecordingError: LocalizedError {
     case cancelled
-    case failed(Int32)
+    case failed(Int32, String?)
 
     var errorDescription: String? {
         switch self {
         case .cancelled:
             return "The recording was cancelled before a file was created."
-        case .failed(let status):
-            return "Apple's screen recorder exited with status \(status)."
+        case .failed(let status, let detail):
+            if let detail, !detail.isEmpty {
+                return "Screen recording failed: \(detail)"
+            }
+            return "Screen recording failed with status \(status)."
         }
     }
 }
@@ -27,7 +30,8 @@ actor ScreenRecordingService {
         process.executableURL = command.executableURL
         process.arguments = command.arguments
         process.standardOutput = FileHandle.nullDevice
-        process.standardError = FileHandle.nullDevice
+        let errorPipe = Pipe()
+        process.standardError = errorPipe
 
         try process.run()
         self.process = process
@@ -39,8 +43,12 @@ actor ScreenRecordingService {
         }
         self.process = nil
 
+        let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+        let errorDetail = String(data: errorData, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
         guard status == 0 || FileManager.default.fileExists(atPath: outputURL.path) else {
-            throw ScreenRecordingError.failed(status)
+            throw ScreenRecordingError.failed(status, errorDetail)
         }
         guard FileManager.default.fileExists(atPath: outputURL.path) else {
             throw ScreenRecordingError.cancelled

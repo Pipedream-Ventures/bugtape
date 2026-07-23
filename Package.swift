@@ -10,9 +10,7 @@ let package = Package(
     products: [
         .library(name: "BugTapeCore", targets: ["BugTapeCore"]),
         .executable(name: "TAPE", targets: ["AppTapeApp"]),
-        .executable(name: "AppTape", targets: ["AppTapeApp"]),
-        .executable(name: "apptape", targets: ["BugTapeCLI"]),
-        .executable(name: "bugtape", targets: ["BugTapeCLI"])
+        .executable(name: "tape-cli", targets: ["BugTapeCLI"])
     ],
     targets: [
         .target(
