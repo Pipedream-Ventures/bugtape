@@ -26,12 +26,19 @@ final class AppTapeStore: ObservableObject {
 
     let outputRoot: URL
     private let recorder = ScreenRecordingService()
+    private let userDefaults: UserDefaults
     private let screenCaptureRequestKey = "didRequestScreenCaptureAccess"
+    private let pendingRecordingPathKey = "pendingRecordingPath"
 
-    init() {
-        outputRoot = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Movies/TAPE", isDirectory: true)
+    init(
+        outputRoot: URL = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Movies/TAPE", isDirectory: true),
+        userDefaults: UserDefaults = .standard
+    ) {
+        self.outputRoot = outputRoot
+        self.userDefaults = userDefaults
         refreshBundles()
+        recoverPendingRecording()
     }
 
     func startNewTape() {
@@ -77,16 +84,20 @@ final class AppTapeStore: ObservableObject {
             let recordingURL = recordingsDirectory.appendingPathComponent(
                 "TAPE-\(Self.fileTimestamp()).mov"
             )
+            userDefaults.set(recordingURL.path, forKey: pendingRecordingPathKey)
             let capturedURL = try await recorder.record(
                 to: recordingURL,
                 includesAudio: includesMicrophone
             )
+            prepareDraft(
+                for: capturedURL,
+                suggestedTitle: "Tape \(Date.now.formatted(date: .abbreviated, time: .shortened))"
+            )
             await selectSource(capturedURL)
-            if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                title = "Tape \(Date.now.formatted(date: .abbreviated, time: .shortened))"
-            }
+            userDefaults.removeObject(forKey: pendingRecordingPathKey)
             successMessage = "Recording saved."
         } catch {
+            clearPendingRecordingIfMissing()
             errorMessage = error.localizedDescription
         }
     }
@@ -178,10 +189,11 @@ final class AppTapeStore: ObservableObject {
             return
         }
 
+        prepareDraft(
+            for: url,
+            suggestedTitle: url.deletingPathExtension().lastPathComponent
+        )
         await selectSource(url)
-        if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            title = url.deletingPathExtension().lastPathComponent
-        }
     }
 
     func buildTape() async {
@@ -308,6 +320,53 @@ final class AppTapeStore: ObservableObject {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    func prepareDraft(for url: URL, suggestedTitle: String) {
+        sourceURL = url
+        sourceMetadata = nil
+        title = suggestedTitle
+        summary = ""
+        notes = ""
+        includesSourceInBundle = true
+        errorMessage = nil
+        successMessage = nil
+    }
+
+    private func recoverPendingRecording() {
+        guard
+            let path = userDefaults.string(forKey: pendingRecordingPathKey),
+            !path.isEmpty
+        else {
+            return
+        }
+
+        let url = URL(fileURLWithPath: path)
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            userDefaults.removeObject(forKey: pendingRecordingPathKey)
+            return
+        }
+
+        prepareDraft(
+            for: url,
+            suggestedTitle: url.deletingPathExtension().lastPathComponent
+        )
+        successMessage = "Recovered your last recording."
+        userDefaults.removeObject(forKey: pendingRecordingPathKey)
+
+        Task {
+            await selectSource(url)
+        }
+    }
+
+    private func clearPendingRecordingIfMissing() {
+        guard
+            let path = userDefaults.string(forKey: pendingRecordingPathKey),
+            !FileManager.default.fileExists(atPath: path)
+        else {
+            return
+        }
+        userDefaults.removeObject(forKey: pendingRecordingPathKey)
     }
 
     private func uniqueBundleURL(title: String) -> URL {

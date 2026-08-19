@@ -40,6 +40,10 @@ let package = Package(
         .testTarget(
             name: "BugTapeCoreTests",
             dependencies: ["BugTapeCore"]
+        ),
+        .testTarget(
+            name: "AppTapeAppTests",
+            dependencies: ["AppTapeApp"]
         )
     ]
 )
