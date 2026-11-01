@@ -26,7 +26,7 @@ swift run apptape help
 - Swift 6, explicit types at public boundaries, no forced unwraps.
 - Keep parsing and rendering in `BugTapeCore`; the executable owns process I/O.
 - New bundle fields must remain backward-compatible or increment `schemaVersion`.
-- Every parser or renderer change needs a focused test.
+- Add a focused test only when a parser or renderer change has a concrete risk QA can't catch.
 
 ## Safety
 
